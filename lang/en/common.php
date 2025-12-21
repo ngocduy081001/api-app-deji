@@ -1,0 +1,78 @@
+<?php
+
+return [
+    'dashboard' => 'Dashboard',
+    'admin_panel' => 'Admin Panel',
+    'home' => 'Home',
+    'search' => 'Search',
+    'welcome' => 'Welcome',
+
+    // Actions
+    'create' => 'Create',
+    'edit' => 'Edit',
+    'update' => 'Update',
+    'delete' => 'Delete',
+    'save' => 'Save',
+    'cancel' => 'Cancel',
+    'back' => 'Back',
+    'submit' => 'Submit',
+    'confirm' => 'Confirm',
+    'close' => 'Close',
+    'view' => 'View',
+    'show' => 'Show',
+    'list' => 'List',
+    'add' => 'Add',
+    'remove' => 'Remove',
+    'reset' => 'Reset',
+    'filter' => 'Filter',
+    'export' => 'Export',
+    'import' => 'Import',
+    'download' => 'Download',
+    'upload' => 'Upload',
+    'print' => 'Print',
+    'refresh' => 'Refresh',
+
+    // Status
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'enabled' => 'Enabled',
+    'disabled' => 'Disabled',
+    'published' => 'Published',
+    'draft' => 'Draft',
+    'pending' => 'Pending',
+    'approved' => 'Approved',
+    'rejected' => 'Rejected',
+    'archived' => 'Archived',
+
+    // Messages
+    'success' => 'Success!',
+    'error' => 'Error!',
+    'warning' => 'Warning!',
+    'info' => 'Info',
+    'created_successfully' => 'Created successfully!',
+    'updated_successfully' => 'Updated successfully!',
+    'deleted_successfully' => 'Deleted successfully!',
+    'saved_successfully' => 'Saved successfully!',
+    'no_data' => 'No data',
+    'loading' => 'Loading...',
+    'confirm_delete' => 'Are you sure you want to delete?',
+
+    // Pagination
+    'showing' => 'Showing',
+    'to' => 'to',
+    'of' => 'of',
+    'results' => 'results',
+    'previous' => 'Previous',
+    'next' => 'Next',
+
+    // Misc
+    'all' => 'All',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'none' => 'None',
+    'optional' => 'Optional',
+    'required' => 'Required',
+    'select' => 'Select',
+    'choose_file' => 'Choose file',
+    'no_file_chosen' => 'No file chosen',
+];

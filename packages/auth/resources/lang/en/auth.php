@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'login' => 'Login',
+    'register' => 'Register',
+    'logout' => 'Logout',
+    'email' => 'Email',
+    'password' => 'Password',
+    'password_confirmation' => 'Confirm Password',
+    'remember_me' => 'Remember me',
+    'forgot_password' => 'Forgot password?',
+    'name' => 'Full Name',
+    'already_registered' => 'Already have an account?',
+    'not_registered' => 'Don\'t have an account?',
+    'agree_terms' => 'I agree to the',
+    'terms_service' => 'Terms of Service',
+    'and' => 'and',
+    'privacy_policy' => 'Privacy Policy',
+    'welcome_back' => 'Welcome back!',
+    'sign_in_account' => 'Sign in to your account',
+    'create_account' => 'Create account',
+    'sign_up_start' => 'Sign up to get started',
+    'login_success' => 'Login successful!',
+    'logout_success' => 'Logout successful!',
+    'register_success' => 'Registration successful!',
+    'invalid_credentials' => 'Invalid email or password.',
+];

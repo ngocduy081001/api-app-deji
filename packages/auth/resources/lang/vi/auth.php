@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'login' => 'Đăng nhập',
+    'register' => 'Đăng ký',
+    'logout' => 'Đăng xuất',
+    'email' => 'Email',
+    'password' => 'Mật khẩu',
+    'password_confirmation' => 'Xác nhận mật khẩu',
+    'remember_me' => 'Ghi nhớ đăng nhập',
+    'forgot_password' => 'Quên mật khẩu?',
+    'name' => 'Họ và tên',
+    'already_registered' => 'Đã có tài khoản?',
+    'not_registered' => 'Chưa có tài khoản?',
+    'agree_terms' => 'Tôi đồng ý với',
+    'terms_service' => 'Điều khoản dịch vụ',
+    'and' => 'và',
+    'privacy_policy' => 'Chính sách bảo mật',
+    'welcome_back' => 'Chào mừng trở lại!',
+    'sign_in_account' => 'Đăng nhập vào tài khoản của bạn',
+    'create_account' => 'Tạo tài khoản mới',
+    'sign_up_start' => 'Đăng ký để bắt đầu',
+    'login_success' => 'Đăng nhập thành công!',
+    'logout_success' => 'Đăng xuất thành công!',
+    'register_success' => 'Đăng ký thành công!',
+    'invalid_credentials' => 'Email hoặc mật khẩu không chính xác.',
+];
