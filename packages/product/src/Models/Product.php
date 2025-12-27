@@ -45,6 +45,7 @@ class Product extends Model
         'view_count',
         'sort_order',
         'meta_data',
+        'price_off'
     ];
 
     /**

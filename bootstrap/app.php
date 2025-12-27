@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'locale' => \App\Http\Middleware\SetLocale::class,
             'allowIPRequest' => \App\Http\Middleware\AllowIPRequest::class,
+            'auth.api' => \App\Http\Middleware\AuthenticateApi::class,
         ]);
 
         // Add SetLocale to web middleware group

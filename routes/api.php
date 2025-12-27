@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APIController;
+use App\Http\Controllers\Api\AuthController;
 use Vendor\Order\Http\Controllers\BookingController;
 
 // Route::get('/user', function (Request $request) {
@@ -101,3 +102,8 @@ use Vendor\Order\Http\Controllers\BookingController;
 // Route::get('/partners', [APIController::class, 'partners']);
 // Route::get('/seo', [APIController::class, 'seo']);
 // Route::get('/footer', [APIController::class, 'getFooter']);
+
+// Authentication Routes are now handled by packages/auth/routes/api.php
+// Routes are available at:
+// - /api/auth/* (JWT authentication)
+// - /api/v1/auth/* (Passport OAuth)

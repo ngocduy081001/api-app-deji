@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Vendor\Customer\Http\Controllers\Api\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,4 +12,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// API routes can be added here if needed
+// Profile API Routes
+Route::prefix('profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'show']);
+    Route::post('/', [ProfileController::class, 'store']);
+    Route::put('/', [ProfileController::class, 'update']);
+});

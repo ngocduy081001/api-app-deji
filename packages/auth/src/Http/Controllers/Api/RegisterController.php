@@ -3,7 +3,7 @@
 namespace Vendor\Auth\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Vendor\Customer\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -13,8 +13,7 @@ class RegisterController extends Controller
 {
     public function __construct(
         protected PassportTokenService $passportTokenService
-    ) {
-    }
+    ) {}
 
     /**
      * Register a new user.
@@ -23,25 +22,48 @@ class RegisterController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:20',
             'scope' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        // Create user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // Check if customer already exists with this email
+        $customer = Customer::where('email', $request->email)->first();
+        $isNewCustomer = false;
+
+        if ($customer) {
+            // Customer exists - check if already has password (already registered)
+            if ($customer->password) {
+                return response()->json([
+                    'message' => 'Email already registered',
+                    'errors' => ['email' => ['This email is already registered. Please use login instead.']]
+                ], 422);
+            }
+
+            // Customer exists but no password - update with password and other info
+            $customer->update([
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone ?? $customer->phone,
+            ]);
+        } else {
+            // Create new customer
+            $customer = Customer::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone ?? null,
+            ]);
+            $isNewCustomer = true;
+        }
 
         $tokenResponse = $this->passportTokenService->issuePasswordToken(
             $request->email,
@@ -51,20 +73,19 @@ class RegisterController extends Controller
 
         if ($tokenResponse['status'] !== 200) {
             return response()->json([
-                'success' => false,
                 'message' => $tokenResponse['data']['message'] ?? 'Unable to issue access token',
                 'errors' => $tokenResponse['data']['errors'] ?? null,
             ], $tokenResponse['status']);
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'User registered successfully',
+            'message' => $isNewCustomer ? 'User registered successfully' : 'Password set successfully. You can now login.',
             'data' => [
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'email' => $customer->email,
+                    'phone' => $customer->phone,
                 ],
                 'access_token' => $tokenResponse['data']['access_token'],
                 'refresh_token' => $tokenResponse['data']['refresh_token'] ?? null,

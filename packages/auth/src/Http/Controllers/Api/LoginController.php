@@ -3,7 +3,7 @@
 namespace Vendor\Auth\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Vendor\Customer\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -14,8 +14,7 @@ class LoginController extends Controller
     public function __construct(
         protected PassportTokenService $passportTokenService,
 
-    ) {
-    }
+    ) {}
 
     /**
      * Login user and return access token and refresh token.
@@ -32,17 +31,15 @@ class LoginController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $customer = Customer::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$customer || !Hash::check($request->password, $customer->password)) {
             return response()->json([
-                'success' => false,
                 'message' => 'Invalid credentials'
             ], 401);
         }
@@ -60,13 +57,13 @@ class LoginController extends Controller
         }
 
         return response()->json([
-            'success' => true,
             'message' => 'Login successful',
             'data' => [
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'email' => $customer->email,
+                    'phone' => $customer->phone,
                 ],
                 'access_token' => $tokenResponse['data']['access_token'],
                 'refresh_token' => $tokenResponse['data']['refresh_token'] ?? null,
@@ -91,7 +88,6 @@ class LoginController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
@@ -109,7 +105,6 @@ class LoginController extends Controller
         }
 
         return response()->json([
-            'success' => true,
             'message' => 'Token refreshed successfully',
             'data' => [
                 'access_token' => $tokenResponse['data']['access_token'],
@@ -132,22 +127,20 @@ class LoginController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $user = $request->user();
+        $customer = $request->user();
 
-        if (!$user) {
+        if (!$customer) {
             return response()->json([
-                'success' => false,
                 'message' => 'Unauthorized'
             ], 401);
         }
 
-        if ($token = $user->token()) {
+        if ($token = $customer->token()) {
             $this->passportTokenService->revokeAccessToken($token->id);
             $this->passportTokenService->revokeRefreshTokensByAccessTokenId($token->id);
         }
@@ -157,7 +150,6 @@ class LoginController extends Controller
         }
 
         return response()->json([
-            'success' => true,
             'message' => 'Logout successful'
         ], 200);
     }
@@ -167,25 +159,23 @@ class LoginController extends Controller
      */
     public function logoutAll(Request $request)
     {
-        $user = $request->user();
+        $customer = $request->user();
 
-        if (!$user) {
+        if (!$customer) {
             return response()->json([
-                'success' => false,
                 'message' => 'Unauthorized'
             ], 401);
         }
 
         $count = 0;
 
-        foreach ($user->tokens as $token) {
+        foreach ($customer->tokens as $token) {
             $this->passportTokenService->revokeAccessToken($token->id);
             $this->passportTokenService->revokeRefreshTokensByAccessTokenId($token->id);
             $count++;
         }
 
         return response()->json([
-            'success' => true,
             'message' => "Logged out from all devices successfully. {$count} token(s) revoked."
         ], 200);
     }
@@ -195,23 +185,22 @@ class LoginController extends Controller
      */
     public function me(Request $request)
     {
-        $user = $request->user();
+        $customer = $request->user();
 
-        if (!$user) {
+        if (!$customer) {
             return response()->json([
-                'success' => false,
                 'message' => 'Unauthorized'
             ], 401);
         }
 
         return response()->json([
-            'success' => true,
             'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'email_verified_at' => $user->email_verified_at,
-                'created_at' => $user->created_at,
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
+                'email_verified_at' => $customer->email_verified_at,
+                'created_at' => $customer->created_at,
             ]
         ], 200);
     }
@@ -227,7 +216,6 @@ class LoginController extends Controller
         $data = $tokenResponse['data'] ?? [];
 
         return response()->json([
-            'success' => false,
             'message' => $data['message'] ?? 'Unable to issue access token',
             'errors' => $data['errors'] ?? ($data ? [$data] : null),
         ], $status);

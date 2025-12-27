@@ -22,11 +22,11 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
             return $isLocal ||
-                   $entry->isReportableException() ||
-                   $entry->isFailedRequest() ||
-                   $entry->isFailedJob() ||
-                   $entry->isScheduledTask() ||
-                   $entry->hasMonitoredTag();
+                $entry->isReportableException() ||
+                $entry->isFailedRequest() ||
+                $entry->isFailedJob() ||
+                $entry->isScheduledTask() ||
+                $entry->hasMonitoredTag();
         });
     }
 
@@ -52,13 +52,39 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      * Register the Telescope gate.
      *
      * This gate determines who can access Telescope in non-local environments.
+     * No authentication required - checks email from request.
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+        Gate::define('viewTelescope', function ($user = null) {
+            // In local environment, allow all (no login required)
+            if ($this->app->environment('local')) {
+                return true;
+            }
+
+            // In production, check email from request (query param, header, or session)
+            $request = request();
+            $email = $request->query('email')
+                ?? $request->header('X-Telescope-Email')
+                ?? $request->session()->get('telescope_email')
+                ?? ($user ? $user->email : null);
+
+            if (!$email) {
+                return false;
+            }
+
+            // Get allowed emails from config or env
+            $allowedEmails = config('telescope.allowed_emails', []);
+
+            if (empty($allowedEmails)) {
+                // If no emails configured, get from env
+                $envEmails = env('TELESCOPE_ALLOWED_EMAILS');
+                if ($envEmails) {
+                    $allowedEmails = array_map('trim', explode(',', $envEmails));
+                }
+            }
+
+            return in_array($email, $allowedEmails);
         });
     }
 }
