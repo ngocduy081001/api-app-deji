@@ -27,6 +27,36 @@ class OrderController extends Controller
     {
         $query = Order::with(['customer', 'orderItems.product']);
 
+        // Nếu user đã đăng nhập, mặc định lấy đơn hàng theo customer_id của user
+        $user = $request->user();
+        if ($user && $user->id) {
+            // Nếu có customer_id trong request, ưu tiên dùng nó (cho admin)
+            // Nếu không có, tự động filter theo customer_id của user đã đăng nhập
+            if ($request->has('customer_id') && $request->input('customer_id') !== '') {
+                $query->where('customer_id', $request->input('customer_id'));
+            } else {
+                // Tự động lấy đơn hàng theo customer_id của user đã đăng nhập
+                $query->where('customer_id', $user->id);
+            }
+        } else {
+            // Nếu chưa đăng nhập, chỉ cho phép tìm theo phone (backward compatibility)
+            if ($request->has('phone') && $request->input('phone') !== '') {
+                $query->where('customer_phone', $request->input('phone'));
+            } else {
+                // Nếu không có phone và không đăng nhập, trả về empty
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'pagination' => [
+                        'current_page' => 1,
+                        'last_page' => 1,
+                        'per_page' => $request->query('per_page', 20),
+                        'total' => 0,
+                    ],
+                ]);
+            }
+        }
+
         // Filter by status
         if ($request->has('status') && $request->input('status') !== '') {
             $query->where('status', $request->input('status'));
@@ -37,8 +67,8 @@ class OrderController extends Controller
             $query->where('payment_status', $request->input('payment_status'));
         }
 
-        // Filter by customer phone
-        if ($request->has('phone') && $request->input('phone') !== '') {
+        // Filter by customer phone (chỉ dùng khi chưa đăng nhập hoặc admin muốn tìm theo phone khác)
+        if ($request->has('phone') && $request->input('phone') !== '' && !$user) {
             $query->where('customer_phone', $request->input('phone'));
         }
 

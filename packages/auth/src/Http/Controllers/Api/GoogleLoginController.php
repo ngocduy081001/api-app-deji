@@ -105,13 +105,10 @@ class GoogleLoginController extends Controller
                 $isNewUser = true;
             }
 
-            // Generate JWT token using Passport password grant
+            // Generate token using Passport password grant
             $tokenResponse = $this->passportTokenService->issuePasswordToken(
                 $customer->email,
-                $tempPassword,
-                $request->input('scope', ''),
-                $request->input('client_id'),
-                $request->input('client_secret'),
+                $tempPassword
             );
 
             // Restore original password if we temporarily changed it
@@ -256,10 +253,7 @@ class GoogleLoginController extends Controller
 
             $tokenResponse = $this->passportTokenService->issuePasswordToken(
                 $customer->email,
-                $tempPassword,
-                $request->input('scope', ''),
-                $request->input('client_id'),
-                $request->input('client_secret'),
+                $tempPassword
             );
 
             // Restore original password if exists

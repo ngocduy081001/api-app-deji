@@ -29,7 +29,44 @@ class Customer extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            // Don't cast password to 'hashed' - Passport needs raw hash value
+            // Password should already be hashed when stored
         ];
+    }
+
+    /**
+     * Get the user settings for the customer.
+     */
+    public function setting()
+    {
+        return $this->hasOne(CustomerSetting::class);
+    }
+
+    /**
+     * Find the user instance for the given username (email).
+     * Required by Passport password grant.
+     * Must be static method.
+     */
+    public static function findForPassport($username)
+    {
+        return static::where('email', $username)->first();
+    }
+
+    /**
+     * Validate the password for the given user.
+     * Required by Passport password grant.
+     */
+    public function validateForPassportPasswordGrant($password)
+    {
+        // Check if user has password
+        if (!$this->password) {
+            return false;
+        }
+
+        // Get raw password value (before casting)
+        $hashedPassword = $this->getOriginal('password') ?? $this->password;
+
+        // Verify password using Hash facade
+        return \Hash::check($password, $hashedPassword);
     }
 }

@@ -5,9 +5,8 @@ use Vendor\Auth\Http\Controllers\Api\LoginController;
 use Vendor\Auth\Http\Controllers\Api\RegisterController;
 use Vendor\Auth\Http\Controllers\Api\GoogleLoginController;
 use Vendor\Auth\Http\Controllers\Api\OtpController;
-use Vendor\Auth\Http\Controllers\Api\JwtLoginController;
-use Vendor\Auth\Http\Controllers\Api\JwtRegisterController;
-use Vendor\Auth\Http\Controllers\Api\JwtAuthController;
+use Vendor\Auth\Http\Controllers\Api\AuthorizationController;
+use Vendor\Auth\Http\Controllers\Api\TokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,11 +14,21 @@ use Vendor\Auth\Http\Controllers\Api\JwtAuthController;
 |--------------------------------------------------------------------------
 |
 | Authentication API routes for mobile apps, SPAs, and third-party integrations
+| Using Laravel Passport for OAuth2 authentication
 |
 */
 
-// Passport OAuth routes (v1/auth)
+// Authentication routes (v1/auth)
 Route::prefix('v1/auth')->name('api.auth.')->group(function () {
+    // OTP routes (public)
+    Route::post('/check-email', [OtpController::class, 'checkEmail'])->name('check-email');
+    Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('send-otp');
+    Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('verify-otp');
+
+    // OAuth 2.0 Authorization Code + PKCE flow (public client)
+    Route::post('/authorize', [AuthorizationController::class, 'authorize'])->name('authorize');
+    Route::post('/token', [TokenController::class, 'token'])->name('token');
+
     // Public routes (không yêu cầu authentication)
     Route::post('/register', [RegisterController::class, 'register'])->name('register');
     Route::post('/login', [LoginController::class, 'login'])->name('login');
@@ -32,25 +41,5 @@ Route::prefix('v1/auth')->name('api.auth.')->group(function () {
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
         Route::post('/logout-all', [LoginController::class, 'logoutAll'])->name('logout-all');
         Route::get('/me', [LoginController::class, 'me'])->name('me');
-    });
-});
-
-// JWT Authentication routes (auth) - for mobile app
-Route::prefix('auth')->name('api.auth.jwt.')->group(function () {
-    // OTP routes
-    Route::post('/check-email', [OtpController::class, 'checkEmail'])->name('check-email');
-    Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('send-otp');
-    Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('verify-otp');
-    
-    // Public routes
-    Route::post('/register', [JwtRegisterController::class, 'register'])->name('register');
-    Route::post('/login', [JwtLoginController::class, 'login'])->name('login');
-    Route::post('/refresh', [JwtAuthController::class, 'refresh'])->name('refresh');
-
-    // Protected routes (yêu cầu JWT token)
-    Route::middleware('auth.api')->group(function () {
-        Route::post('/logout', [JwtAuthController::class, 'logout'])->name('logout');
-        Route::post('/logout-all', [JwtAuthController::class, 'logoutAll'])->name('logout-all');
-        Route::get('/me', [JwtAuthController::class, 'me'])->name('me');
     });
 });

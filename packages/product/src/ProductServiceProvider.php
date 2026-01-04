@@ -123,5 +123,6 @@ class ProductServiceProvider extends ServiceProvider
                 ],
             ],
         ]);
+
     }
 }

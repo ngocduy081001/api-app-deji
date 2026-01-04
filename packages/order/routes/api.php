@@ -16,8 +16,8 @@ use Vendor\Order\Http\Controllers\Api\ShowroomController;
 |
 */
 
-// Customer Addresses API Routes
-Route::prefix('customer-addresses')->group(function () {
+// Customer Addresses API Routes - Protected with Passport
+Route::prefix('customer-addresses')->middleware('auth:api')->group(function () {
     Route::get('/', [CustomerAddressController::class, 'index']);
     Route::post('/', [CustomerAddressController::class, 'store']);
     Route::get('/{id}', [CustomerAddressController::class, 'show']);
@@ -25,8 +25,8 @@ Route::prefix('customer-addresses')->group(function () {
     Route::delete('/{id}', [CustomerAddressController::class, 'destroy']);
 });
 
-// Orders API Routes
-Route::prefix('orders')->group(function () {
+// Orders API Routes - Protected with Passport
+Route::prefix('orders')->middleware('auth:api')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::post('/', [OrderController::class, 'store']);
     Route::get('/{id}', [OrderController::class, 'show']);
@@ -34,8 +34,8 @@ Route::prefix('orders')->group(function () {
     Route::delete('/{id}', [OrderController::class, 'destroy']);
 });
 
-// Bookings API Routes
-Route::prefix('bookings')->group(function () {
+// Bookings API Routes - Protected with Passport
+Route::prefix('bookings')->middleware('auth:api')->group(function () {
     Route::get('/', [BookingController::class, 'index']);
     Route::post('/', [BookingController::class, 'store']);
     Route::get('/{id}', [BookingController::class, 'show']);
@@ -45,13 +45,18 @@ Route::prefix('bookings')->group(function () {
 
 // Warranties API Routes
 Route::prefix('warranties')->group(function () {
-    Route::get('/', [WarrantyController::class, 'index']);
+    // Public lookup routes (no auth required)
     Route::get('/lookup/code', [WarrantyController::class, 'lookupByCode']);
     Route::get('/lookup/phone', [WarrantyController::class, 'lookupByPhone']);
-    Route::post('/activate', [WarrantyController::class, 'activate']);
-    Route::get('/{id}', [WarrantyController::class, 'show']);
-    Route::put('/{id}', [WarrantyController::class, 'update']);
-    Route::delete('/{id}', [WarrantyController::class, 'destroy']);
+    
+    // Protected routes (require Passport authentication)
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/', [WarrantyController::class, 'index']);
+        Route::post('/activate', [WarrantyController::class, 'activate']);
+        Route::get('/{id}', [WarrantyController::class, 'show']);
+        Route::put('/{id}', [WarrantyController::class, 'update']);
+        Route::delete('/{id}', [WarrantyController::class, 'destroy']);
+    });
 });
 
 // Showrooms API Routes

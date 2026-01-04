@@ -462,30 +462,6 @@ class APIController extends Controller
                 'is_read' => false,
             ]);
 
-            // Lưu thông tin địa chỉ giao hàng để sử dụng lần sau
-            try {
-                $ward = $request->input('ward', '');
-                \Vendor\Order\Models\CustomerAddress::updateOrCreate(
-                    [
-                        'phone' => $validatedData['phone'],
-                        'province' => $validatedData['province'],
-                        'district' => $validatedData['district'],
-                        'ward' => $ward,
-                        'address' => $validatedData['address'],
-                    ],
-                    [
-                        'customer_id' => $customer->id,
-                        'name' => $validatedData['name'],
-                        'email' => $validatedData['email'] ?? null,
-                        'note' => $request->input('note', null),
-                        'last_used_at' => now(),
-                    ]
-                );
-            } catch (\Exception $e) {
-                // Log error nhưng không block order flow
-                \Illuminate\Support\Facades\Log::error('Error saving customer address: ' . $e->getMessage());
-            }
-
             $cart->load('customer');
 
             return response()->json(['message' => 'Bạn đã đặt hàng thành công ! Kiểm tra email của bạn để xem thông tin chi tiết.', 'Cart' => $cart], 201);

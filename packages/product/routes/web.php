@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Vendor\Product\Http\Controllers\Web\ProductController;
 use Vendor\Product\Http\Controllers\Web\ProductCategoryController;
 use Vendor\Product\Http\Controllers\Web\CatalogController;
+use Vendor\Product\Http\Controllers\Web\PopularSearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,4 +41,14 @@ Route::prefix('admin/categories')->name('admin.categories.')->middleware(['auth'
     Route::get('/{category}', [ProductCategoryController::class, 'getCategory'])->name('get');
     Route::put('/{category}', [ProductCategoryController::class, 'update'])->name('update');
     Route::delete('/{category}', [ProductCategoryController::class, 'destroy'])->name('destroy');
+});
+
+// Admin Popular Searches Routes
+Route::prefix('admin/popular-searches')->name('admin.popular-searches.')->middleware(['auth'])->group(function () {
+    Route::get('/', [PopularSearchController::class, 'index'])->name('index');
+    Route::post('/', [PopularSearchController::class, 'store'])->name('store');
+    Route::post('/update-order', [PopularSearchController::class, 'updateOrder'])->name('update-order');
+    Route::put('/{popularSearch}', [PopularSearchController::class, 'update'])->name('update');
+    Route::post('/{popularSearch}/toggle-status', [PopularSearchController::class, 'toggleStatus'])->name('toggle-status');
+    Route::delete('/{popularSearch}', [PopularSearchController::class, 'destroy'])->name('destroy');
 });

@@ -3,7 +3,10 @@
 namespace Vendor\Auth\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Device;
+use App\Models\Otp;
 use Vendor\Customer\Models\Customer;
+use Vendor\Customer\Models\CustomerSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -17,15 +20,32 @@ class RegisterController extends Controller
 
     /**
      * Register a new user.
+     * Supports OTP verification and device management for mobile apps.
      */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&]/',
+                'confirmed',
+            ],
+            'otp_code' => 'nullable|string|size:6',
+            'device_id' => 'nullable|string|max:255',
+            'device_name' => 'nullable|string|max:255',
+            'platform' => 'nullable|in:ios,android',
+            'fcm_token' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
-            'scope' => 'nullable|string',
+        ], [
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.regex' => 'Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt',
         ]);
 
         if ($validator->fails()) {
@@ -33,6 +53,21 @@ class RegisterController extends Controller
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // If OTP code is provided, verify it
+        if ($request->filled('otp_code')) {
+            $otp = Otp::forEmailAndPurpose($request->email, 'register')
+                ->where('otp_code', $request->otp_code)
+                ->where('is_used', true)
+                ->where('used_at', '>=', now()->subMinutes(5))
+                ->first();
+
+            if (!$otp) {
+                return response()->json([
+                    'message' => 'Mã OTP chưa được xác thực hoặc đã hết hạn. Vui lòng xác thực OTP trước.',
+                ], 400);
+            }
         }
 
         // Check if customer already exists with this email
@@ -53,6 +88,7 @@ class RegisterController extends Controller
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone ?? $customer->phone,
+                'email_verified_at' => $request->filled('otp_code') ? now() : null,
             ]);
         } else {
             // Create new customer
@@ -61,14 +97,32 @@ class RegisterController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone ?? null,
+                'email_verified_at' => $request->filled('otp_code') ? now() : null,
             ]);
             $isNewCustomer = true;
         }
 
+        // Create default settings for new customer
+        if ($isNewCustomer) {
+            CustomerSetting::getOrCreate($customer->id);
+        }
+
+        // Handle device management if device_id is provided
+        $device = null;
+        if ($request->filled('device_id')) {
+            $device = $this->createOrUpdateDevice(
+                $customer,
+                $request->device_id,
+                $request->device_name ?? null,
+                $request->platform ?? null,
+                $request->fcm_token ?? null
+            );
+        }
+
+        // Passport handles token generation
         $tokenResponse = $this->passportTokenService->issuePasswordToken(
             $request->email,
-            $request->password,
-            $this->resolveScope($request)
+            $request->password
         );
 
         if ($tokenResponse['status'] !== 200) {
@@ -96,8 +150,27 @@ class RegisterController extends Controller
         ], 201);
     }
 
-    protected function resolveScope(Request $request): string
-    {
-        return $request->input('scope', config('services.passport.default_scope', ''));
+    /**
+     * Create or update device for mobile app
+     */
+    protected function createOrUpdateDevice(
+        Customer $customer,
+        string $deviceId,
+        ?string $deviceName = null,
+        ?string $platform = null,
+        ?string $fcmToken = null
+    ): Device {
+        return Device::updateOrCreate(
+            [
+                'user_id' => $customer->id,
+                'device_id' => $deviceId,
+            ],
+            [
+                'device_name' => $deviceName,
+                'platform' => $platform,
+                'fcm_token' => $fcmToken,
+                'last_used_at' => now(),
+            ]
+        );
     }
 }
