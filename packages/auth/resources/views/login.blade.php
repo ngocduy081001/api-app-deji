@@ -63,5 +63,5 @@
                 {{ __('auth::auth.login') }}
             </button>
         </div>
-    </form>
+    </form>`
 </x-guest-layout>

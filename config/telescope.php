@@ -20,6 +20,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allowed Emails for Production
+    |--------------------------------------------------------------------------
+    |
+    | This option defines which email addresses can access Telescope in
+    | production environment. In local environment, all authenticated users
+    | can access Telescope.
+    |
+    | You can set this via TELESCOPE_ALLOWED_EMAILS env variable (comma-separated)
+    | or directly in this array.
+    |
+    */
+
+    'allowed_emails' => env('TELESCOPE_ALLOWED_EMAILS')
+        ? array_map('trim', explode(',', env('TELESCOPE_ALLOWED_EMAILS')))
+        : [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Telescope Domain
     |--------------------------------------------------------------------------
     |
@@ -94,7 +112,7 @@ return [
 
     'middleware' => [
         'web',
-        Authorize::class,
+        Authorize::class, // Gate will handle authorization without requiring login
     ],
 
     /*

@@ -42,7 +42,11 @@ return [
         ],
         'api' => [
             'driver' => 'passport',
-            'provider' => 'users',
+            'provider' => 'customers',
+        ],
+        'customer' => [
+            'driver' => 'passport',
+            'provider' => 'customers',
         ],
     ],
 
@@ -67,6 +71,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'customers' => [
+            'driver' => 'eloquent',
+            'model' => Vendor\Customer\Models\Customer::class,
         ],
 
         // 'users' => [
@@ -115,5 +123,17 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
+    /*
+    |--------------------------------------------------------------------------
+    | JWT Token Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for JWT-based authentication tokens
+    |
+    */
+
+    'access_token_ttl' => env('AUTH_ACCESS_TOKEN_TTL', 900), // 15 minutes in seconds
+    'refresh_token_ttl' => env('AUTH_REFRESH_TOKEN_TTL', 1209600), // 14 days in seconds
 
 ];

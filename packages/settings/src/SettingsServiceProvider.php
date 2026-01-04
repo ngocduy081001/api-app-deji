@@ -90,7 +90,7 @@ class SettingsServiceProvider extends ServiceProvider
             'icon' => 'settings',
             'order' => 100,
             'group' => 'main',
-            'active' => ['admin.settings', 'admin.menus', 'admin.banners', 'admin.slides'],
+            'active' => ['admin.settings', 'admin.menus', 'admin.banners', 'admin.slides', 'admin.popular-searches'],
             'children' => [
                 [
                     'title' => 'Cài đặt hệ thống',
@@ -111,6 +111,11 @@ class SettingsServiceProvider extends ServiceProvider
                     'title' => 'Slide',
                     'route' => 'admin.slides.index',
                     'active' => ['admin.slides'],
+                ],
+                [
+                    'title' => 'Tìm kiếm phổ biến',
+                    'route' => 'admin.popular-searches.index',
+                    'active' => ['admin.popular-searches'],
                 ],
             ],
         ]);
